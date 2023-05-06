@@ -37,7 +37,7 @@ class Program
 
         var speechConfig = SpeechConfig.FromSubscription(speechKey, speechRegion);
         // The language of the voice that speaks.
-        speechConfig.SpeechSynthesisVoiceName = "en-US-JennyMultilingualNeural"; 
+        speechConfig.SpeechSynthesisVoiceName = "en-GB-SoniaNeural"; 
         var audioOutputConfig = AudioConfig.FromDefaultSpeakerOutput();
 
         using (var speechSynthesizer = new SpeechSynthesizer(speechConfig, audioOutputConfig))
@@ -71,6 +71,7 @@ class Program
         using var audioConfig = AudioConfig.FromDefaultMicrophoneInput();
         using var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
         var conversationEnded = false;
+        var indigoAttention = false;
 
         while(!conversationEnded)
         {
@@ -84,17 +85,35 @@ class Program
                 case ResultReason.RecognizedSpeech:
                     if (speechRecognitionResult.Text == "Stop.")
                     {
+                        Console.WriteLine($"Recognized speech: {speechRecognitionResult.Text}");
                         Console.WriteLine("Conversation ended.");
+                        conversationEnded = true;
+                    }
+                    else if (speechRecognitionResult.Text == "Hey, Indigo.")
+                    {
+                        Console.WriteLine("Ok, I'm listening.");
+                        indigoAttention = true;
+                    }
+                    else if (speechRecognitionResult.Text == "Thanks Indigo.")
+                    {
+                        Console.WriteLine("You're Welcome");
+                        string text = "You're Welcome";
+                        //await synthesizer.SpeakTextAsync(text)
+                        indigoAttention = false;
                         conversationEnded = true;
                     }
                     else
                     {
+                        if(indigoAttention == true){ 
                         Console.WriteLine($"Recognized speech: {speechRecognitionResult.Text}");
                         await AskOpenAI(speechRecognitionResult.Text).ConfigureAwait(true);
+                        }
                     }
                     break;
                 case ResultReason.NoMatch:
+                    Console.WriteLine($"Recognized speech: {speechRecognitionResult.Text}");
                     Console.WriteLine($"No speech could be recognized: ");
+                    indigoAttention = false;
                     break;
                 case ResultReason.Canceled:
                     var cancellationDetails = CancellationDetails.FromResult(speechRecognitionResult);
