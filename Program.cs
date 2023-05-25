@@ -15,7 +15,7 @@ class Program
     static string openAIEndpoint = Environment.GetEnvironmentVariable("OPEN_AI_ENDPOINT");
 
     // Enter the deployment name you chose when you deployed the model.
-    static string engine = "text-davinci-002";
+    static string engine = "ChatGPTish";
 
     // This example requires environment variables named "SPEECH_KEY" and "SPEECH_REGION"
     static string speechKey = Environment.GetEnvironmentVariable("SPEECH_KEY");
@@ -24,11 +24,13 @@ class Program
     // Prompts Azure OpenAI with a request and synthesizes the response.
     async static Task AskOpenAI(string prompt)
     {
+
+        var bigPrompt = $" You are an AI chatbot with the personality of a 17 year old girl. If you do not know the answer say, I don't know. Add Meow at the end of each line. {prompt}";
         // Ask Azure OpenAI
         OpenAIClient client = new(new Uri(openAIEndpoint), new AzureKeyCredential(openAIKey));
         var completionsOptions = new CompletionsOptions()
         {
-            Prompts = { prompt },
+            Prompts = { bigPrompt },
             MaxTokens = 100,
         };
         Response<Completions> completionsResponse = client.GetCompletions(engine, completionsOptions);
@@ -97,8 +99,6 @@ class Program
                     else if (speechRecognitionResult.Text == "Thanks Indigo.")
                     {
                         Console.WriteLine("You're Welcome");
-                        string text = "You're Welcome";
-                        //await synthesizer.SpeakTextAsync(text)
                         indigoAttention = false;
                         conversationEnded = true;
                     }
